@@ -1,0 +1,37 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build & Deploy to Cloud Run
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Google Cloud CLI
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+    - name: Set up gcloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: raibo-461721
+
+    - name: Build and push container
+      run: |
+        gcloud builds submit --tag gcr.io/raibo-461721n/backend-deployer
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy backend-deployer \
+          --image gcr.io/raibo-461721/backend-deployer \
+          --platform managed \
+          --region your-region \
+          --allow-unauthenticated

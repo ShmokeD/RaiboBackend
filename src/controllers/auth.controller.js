@@ -3,7 +3,6 @@ import { enqueJob } from '../utils/job.handler.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
 
 const registerUser = asyncHandler(async (req, res) => {
     if (!req.body) {

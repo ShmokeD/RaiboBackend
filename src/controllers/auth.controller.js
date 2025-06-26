@@ -1,10 +1,9 @@
 import { User } from '../models/user.model.js';
 import { Company } from '../models/company.model.js'; // Import the Company model
-import { sendVerificationEmail} from '../services/mailer.service.js';
+import { sendVerificationEmail, sendResetEmail} from '../services/mailer.service.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import mongoose from 'mongoose'; // Import mongoose to use mongoose.Types.ObjectId
 
 const registerUser = asyncHandler(async (req, res) => {
     if (!req.body) {
@@ -204,6 +203,33 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
 });
 
+const resetPassword = asyncHandler(async (req, res) => {
+try{
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const user = await User.findOne({resetToken : token});
+
+    if(!user) {
+        return res.status(400).json({
+            message: "Invalid verification code"
+        });
+    }
+
+        user.password = password;
+        await user.save();
+        return res.redirect(`${process.env.FRONTEND_URL}/login`);
+}
+catch (error)
+    {
+        return res.status(500).json({
+            message: "An error occurred while verifying the user",
+            error: error.message
+        });
+    }
+}
+);
+
 const requestVerificationEmail = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
@@ -234,4 +260,45 @@ const requestVerificationEmail = asyncHandler(async (req, res) => {
 
 });
 
-export { registerUser, loginUser, logoutUser, refreshToken , verifyEmail, requestVerificationEmail};
+const requestPasswordResetEmail = asyncHandler(async (req, res) => {
+    try
+    {
+    const {id} = req.params;
+
+    const user = await User.findById(id).populate('fullname').populate('isVerified');
+
+    if(!user) {
+        return res.status(404).json({
+            message: "User not found"
+        });
+    }
+
+    if(!user.isVerified) {
+        return res.status(400).json({
+            message: "User is not verified"
+        });
+    }
+
+
+    const resetToken = await sendResetEmail(user);
+
+    user.resetToken = resetToken;
+    await user.save();
+
+    return res.status(200).json({
+        message: "Password reset email sent"
+    });}
+
+    catch (error)
+    {
+        return res.status(500).json({
+            message: "An error occurred while verifying the user",
+            error: error.message
+        });
+    }
+
+
+
+});
+
+export { registerUser, loginUser, logoutUser, refreshToken , verifyEmail, requestVerificationEmail, requestPasswordResetEmail, resetPassword};

@@ -10,6 +10,13 @@ const sendVerificationEmail = async function(user)
     return token;
 }
 
+const sendResetEmail = async function(user)
+{
+    const token = [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    const values = {name: user.fullname, ctaLink: `${process.env.BACKEND_URL}/api/v1/auth/reset-password/${token}`}
+    await enqueJob([user._id],"reset-password", "email", values );
+    return token;
+}
 
 const enqueJob =  async function(recievers, task, channel,values){
 
@@ -41,4 +48,4 @@ const enqueJob =  async function(recievers, task, channel,values){
     }
 }
 
-export {enqueJob , sendVerificationEmail};
+export {enqueJob , sendVerificationEmail, sendResetEmail};

@@ -24,6 +24,11 @@ const userSchema = new Schema(
         default: null,
         expires: 3000
     },
+    resetToken:{
+      type: String,
+      default: null,
+      expires: 1800
+    },
     fullname: {
       type: String,
       required: true,

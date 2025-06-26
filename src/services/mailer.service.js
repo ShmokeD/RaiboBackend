@@ -6,6 +6,7 @@ const sendVerificationEmail = async function(user)
 {
     const token = [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
     const values = {name: user.fullname, ctaLink: `${process.env.BACKEND_URL}/api/v1/auth/verify-email/${token}`,ctaText:"Click here"}
+    // This should redirect to the frontend verification page
     await enqueJob([user._id],"verify-user-email", "email", values );
     return token;
 }

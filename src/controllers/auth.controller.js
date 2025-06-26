@@ -212,7 +212,7 @@ try{
 
     if(!user) {
         return res.status(400).json({
-            message: "Invalid verification code"
+            message: "Invalid Reset code"
         });
     }
 
